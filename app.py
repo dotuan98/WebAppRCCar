@@ -2,8 +2,8 @@
 # from importlib import import_module
 # import os
 # from importlib import import_module
-from flask import Flask, render_template, Response
-
+from flask import Flask, render_template, Response, request, redirect, url_for, make_response
+import motor
 
 # import camera driver
 # if os.environ.get('CAMERA'):
@@ -12,16 +12,24 @@ from flask import Flask, render_template, Response
 #     from camera import Camera
 
 # Raspberry Pi camera module (requires picamera package)
-from camera_pi import Camera
+from camera_opencv import Camera
 
 
 app = Flask(__name__)
 
+LEFT, RIGHT, FORWARD, BACKWARD, STOP = "left", "right", "forward", "backward", "stop"
+AVAILABLE_COMMANDS = {
+    'Left': LEFT,
+    'Forward': FORWARD,
+    'Right' : RIGHT,
+    'Backward': BACKWARD,
+    'Stop': STOP
+}
 
 @app.route('/')
 def index():
     """Home page"""
-    return render_template('index.html')
+    return render_template('index.html', commands=AVAILABLE_COMMANDS)
 
 
 def gen(camera):
@@ -41,6 +49,27 @@ def video_feed():
     return Response(gen(Camera()),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
+"""@app.route('/background_process_test')
+def background_process_test():
+    print ("Hello")
+    return ("nothing")
+"""
+
+@app.route('/<cmd>')
+def command(cmd=None):
+	if cmd == STOP:
+		motor.stop()
+	elif cmd == FORWARD:
+		motor.forward()
+	elif cmd == BACKWARD:
+		motor.backward()
+	elif cmd == LEFT:
+		motor.left()
+	else:
+		motor.right()
+	response = "Moving {}".format(cmd.capitalize())
+	return response, 200, {'Content-Type': 'text/plain'}
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80, debug=True, threaded=True)
+    app.run(host='0.0.0.0', port=8000, debug=True, threaded=True)
+
