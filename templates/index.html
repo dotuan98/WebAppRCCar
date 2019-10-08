@@ -1,16 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+	body {background-color: lightyellow}
+	h1 {color:blue}
+
+	button {
+		color: blue;
+		background:lightgrey;
+		border: 1px solid #000;
+		border-radius: 8px;
+		position: center;
+	}
+    </style>
     <meta charset="UTF-8">
     <title>Test Cam</title>
 </head>
 <body>
     <h1>Video Streaming for Raspberry Pi</h1>
     <img src="{{ url_for('video_feed') }}">
+    <h1>Control</h1>
 
-    <form action="{{ url_for('forward') }}" method="get">
-    <input type="submit" value="Forward"
-         name="Submit" id="piForward" />
-</form>
+<h2>Javascript Capture Keyboard Input Example</h2>
+<h3>onkeydown - onkeyup</h3>
+Key Pressed : <span id="kp"></span>
+<br />
+Key Code : <span id="kc"></span>
+<p id="status">Keyboard Event Status</p>
+
+{# and then elsewhere #}
+<script>
+document.onkeydown = function(event) {
+	var key_press = String.fromCharCode(event.keyCode);
+	var key_code = event.keyCode;
+	document.getElementById('kp').innerHTML = key_press;
+      	document.getElementById('kc').innerHTML = key_code;
+	var status = document.getElementById('status');
+	status.innerHTML = "DOWN Event Fired For : "+key_press;
+	var request = new XMLHttpRequest();
+	if(key_press == "W"){
+		//alert("Put script to run specific for 'W' key here");
+      		request.open("GET", "/forward", true);
+	      	request.send();
+	} else if(key_press == "A") {
+		//alert("Put script to run specific for 'A' key here");
+		request.open("GET", "/left", true);
+		request.send();
+	} else if(key_press == "S") {
+		//alert("Put script to run specific for 'S' key here");
+		request.open("GET", "/backward", true);
+		request.send();
+	} else if(key_press == "D") {
+		//alert("Put script to run specific for 'D' key here");
+		request.open("GET", "/right", true);
+		request.send();
+	} else if(key_press == "X") {
+		//alert("Put script to run specific for 'D' key here");
+		request.open("GET", "/stop", true);
+		request.send();
+	}
+}
+document.onkeyup = function(event){
+    var key_press = String.fromCharCode(event.keyCode);
+	var status = document.getElementById('status');
+	status.innerHTML = "UP Event Fired For : "+key_press;
+}
+
+</script>
 </body>
 </html>
